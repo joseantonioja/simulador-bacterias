@@ -1,0 +1,60 @@
+Identificador	Color	Tipo
+0				Blanco	Espacio vacío
+1				Negro/Gris	Bacteria
+2				Rojo	Nutriente
+Parametros
+	breedLapse	Tiempo que tarda en reproducirse una bacteria.
+	boostFeeding	Unidades de tiempo restante que obtiene una bacteria al encontrar un nutriente.
+	bipartNum	Número máximo de biparticiones que sufre una bacteria en cada iteración.
+Atributos de una Bacteria
+	timeLeft 	Tiempo de vida restante
+	age	Edad
+Reglas
+	Sobre las bacterias.
+		Una bacteria con tl>0 seguirá viva a la siguiente generación.
+		Una bacteria con tl>=5 será color negro.
+		Una bacteria con 1 <= tl < 5 será color gris.
+		Una bacteria muere si su tiempo de vida es 0 y se transforma en nutriente a la siguiente generación.
+		Una bacteria aumenta su tl en boostFeeding unidades al alimentarse.
+		Una bacteria nace en un espacio vacío si una o más bacterias en su vecindad cumplen que:
+			age%breedLapse = 0
+			bipartNum>0
+		A una de esas bacterias que cumplan con esas condiciones se le decrementara en 1 el valor de su bipartNum.
+	Sobre los nutrientes
+		Si el nutriente tiene una o más bacterias a su alrededor:
+			Si existe una con el menor timeLeft:
+				Es comida por esa célula.
+			Si no:
+				Si existe una con la menor age:
+					Es comida por esa célula.
+				Si no:
+					Aleatoriamente se eligirá a alguna para que se alimente.
+			El nutriente pasa a espacio vacío a la siguiente generación.
+		Si no:
+			Continua en el mismo espacio a la siguiente generación.
+
+
+
+
+Si el cuadro contiene bacterias
+	Si no hay nutrientes
+		Si rand() < 0.5
+			rotar a la izquierda
+		si no
+			rotar a la derecha
+	Si no
+		Si hay 3 o 4 bacterias
+			No pasa nada
+		Si hay 1
+			Si hay sólo un nutriente
+				Si la fila y  columna de la bacteria no coinciden con la del nutriente
+					Hacer que concida uno u otro
+				Si no
+					No hacer nada
+			Si no
+				No hacer nada
+		Si hay 2
+			Colocar a ambas bacterias a lado del nutriente
+Si no
+	No hacer nada
+	
