@@ -51,7 +51,7 @@ Colony::Colony(int r, int c, char bl, char bf, double probFood, double probBact,
 void Colony::printCells(){
 	for(int i=0; i<rows; i++){
 		for(int j=0; j<cols; j++){
-			cout <<(char)( cells[i][j]->type + '0')<< ":" << cells[i][j]->timeLeft << "\t";
+			cout <<(char)( cells[i][j]->type + '0')<< ":" << cells[i][j]->timeLeft <<"\t";
 		}
 		cout << endl;
 	}
@@ -168,6 +168,7 @@ void Colony::eatAndBreed(){
 			if(tmpCells[i][j]->type==BACTERIUM){
 				if(tmpCells[i][j]->timeLeft==0){
 					tmpCells[i][j]->type = FOOD;
+					tmpCells[i][j]->age = 0;
 					cells[i][j] = tmpCells[i][j];
 				}
 				else if(tmpCells[i][j]->age==0)
@@ -176,4 +177,114 @@ void Colony::eatAndBreed(){
 			else
 				cells[i][j] = tmpCells[i][j];
 		}
+}
+
+void Colony::swapCells(int x1, int y1, int x2, int y2){
+	Cell* tmp = cells[x1][y1];
+	cells[x1][y1] = cells[x2][y2];
+	cells[x2][y2] = tmp;
+}
+
+void Colony::move(){
+	cout << "Moviendo..."<<endl;
+	int counters[3];
+	vector< Cell* > neighborhood;
+	neighborhood.resize(4);
+	srand (time(NULL));
+	for(int i=rand()%2; i<rows-1; i+=2){
+		for(int j=rand()%2; j<cols-1; j+=2){
+			cout << "Procesando cuadro ("<< i << "," << j<<"),("<< i+1<<", "<<j+1<<")"<<endl; 
+			counters[BLANK] = 0;
+			counters[BACTERIUM] = 0;
+			counters[FOOD] = 0;
+			counters[cells[i][j]->type]++;
+			counters[cells[i][j+1]->type]++;
+			counters[cells[i+1][j]->type]++;
+			counters[cells[i+1][j+1]->type]++;
+			cout << "Hay "<<counters[BLANK]<<" blancos, "<<counters[BACTERIUM]<<"Bacterias, "<<counters[FOOD]<<" Nutrientes"<<endl;
+			if(counters[BACTERIUM]>0){
+				if(counters[FOOD]==0){
+					cout << "No hay comida, pero si bacterias, rotando..."<<endl;
+					neighborhood[0] = cells[i][j];
+					neighborhood[1] = cells[i][j+1];
+					neighborhood[2] = cells[i+1][j+1];
+					neighborhood[3] = cells[i+1][j];
+					if(rand()%100<50){
+						//Rotar a la izquierda
+						cells[i][j] = neighborhood[1];
+						cells[i][j+1] = neighborhood[2];
+						cells[i+1][j] = neighborhood[0];
+						cells[i+1][j+1] = neighborhood[3];
+					}
+					else{						
+						//Rotar a la derecha
+						cells[i][j] = neighborhood[3];
+						cells[i][j+1] = neighborhood[0];
+						cells[i+1][j+1] = neighborhood[1];
+						cells[i+1][j] = neighborhood[2];
+					}
+				}
+				else if(counters[FOOD] == 1){
+					if(counters[BACTERIUM]==1){
+						//Hacer que coincida fila o columna
+						//Hay 4 casos
+						//El movimiento horizontal tiene una probabilidad igual al vertical
+						cout << "Una bacteria y una comida, moviendo..."<<endl;
+						if(cells[i][j]->type==BACTERIUM && cells[i+1][j+1]->type==FOOD){
+							if(rand()%100<50)
+								swapCells(i, j, i, j+1);
+							else
+								swapCells(i, j, i+1,j);
+						}
+						else if(cells[i][j]->type==FOOD && cells[i+1][j+1]->type==BACTERIUM){
+							if(rand()%100<50)
+								swapCells(i+1, j+1, i+1, j);
+							else
+								swapCells(i+1, j+1, i, j+1);
+						}
+						else if(cells[i][j+1]->type==BACTERIUM && cells[i+1][j]->type==FOOD){
+							if(rand()%100 < 50)
+								swapCells(i, j+1, i, j);
+							else 
+								swapCells(i, j+1, i+1, j+1);
+						}
+						else if(cells[i][j+1]->type==FOOD && cells[i+1][j]->type==BACTERIUM){
+							if(rand()%100<50)
+								swapCells(i+1, j, i+1, j+1);
+							else
+								swapCells(i+1, j, i, j);
+						}
+					}
+					else if(counters[BACTERIUM]==2){
+						cout << "Dos bacterias y un nutriente, moviendo"<<endl;
+						//Hacer que ambas queden a los lados
+						if(cells[i][j]->type==FOOD && cells[i+1][j+1]->type==BACTERIUM){
+								if(cells[i][j+1]->type==BACTERIUM)
+									swapCells(i+1, j+1, i+1, j);
+								else 
+									swapCells(i+1, j+1, i, j+1);
+						}
+						else if(cells[i][j+1]->type==FOOD && cells[i+1][j]->type==BACTERIUM){
+								if(cells[i][j]->type==BACTERIUM)
+									swapCells(i+1, j, i+1, j+1);
+								else 
+									swapCells(i+1, j, i, j);
+						}
+						else if(cells[i+1][j]->type==FOOD && cells[i][j+1]->type==BACTERIUM){
+								if(cells[i+1][j+1]->type==BACTERIUM)
+									swapCells(i, j+1, i, j);
+								else 
+									swapCells(i, j+1, i+1, j+1);
+						}
+						else if(cells[i+1][j+1]->type==FOOD && cells[i][j]->type==BACTERIUM){
+								if(cells[i+1][j]->type==BACTERIUM)
+									swapCells(i, j, i , j+1);
+								else 
+									swapCells(i, j, i+1, j);
+						}
+					}
+				}
+			}
+		}
+	}
 }

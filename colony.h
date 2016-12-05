@@ -16,6 +16,7 @@ class Colony{
 private:
 	Cell* getDyingCell(vector<Cell*>);
 	Cell* getBreedingCell(vector<Cell*>);
+	void swapCells(int, int, int, int );
 public:
 	char breedLapse;
 	char boostFeeding;
